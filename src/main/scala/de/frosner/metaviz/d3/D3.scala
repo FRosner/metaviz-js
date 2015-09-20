@@ -11,6 +11,8 @@ object D3 extends js.Object {
 
   val scale: ScaleFactory = js.native
 
+  val svg: SVG = js.native
+
   def select(selector: String): Selection = js.native
 
   def select(selector: dom.Node): Selection = js.native

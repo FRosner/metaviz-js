@@ -9,4 +9,6 @@ trait Selection extends js.Object {
 
   def attr[T](attr: String, value: T): Selection = js.native
 
+  def call(callback: js.Function, args: js.Any*): Selection = js.native
+
 }

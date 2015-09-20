@@ -51,10 +51,29 @@ case class ScatterPlot[X, Y](container: dom.Node,
     }
 
     val svg = document.createElement("svg")
-    D3.select(svg)
+    val svgSelection = D3.select(svg)
       .attr("width", width)
       .attr("height", height)
       .attr("class", "c3")
+
+    val xAxis = D3.svg.axis()
+      .scale(xScale)
+      .orient("bottom")
+
+    svgSelection.append("g")
+      .attr("transform", s"translate(0, $height)")
+      .attr("class", "x axis")
+      .call(xScale)
+
+    val yAxis = D3.svg.axis()
+      .scale(yScale)
+      .orient("left")
+
+    svgSelection.append("g")
+      .attr("transform", s"translate(0, 0)")
+      .attr("class", "y axis")
+      .call(yScale)
+
     svg
   }
 
