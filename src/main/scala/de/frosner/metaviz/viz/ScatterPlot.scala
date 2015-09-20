@@ -7,15 +7,15 @@ import org.scalajs.jquery.jQuery
 import scala.scalajs.js
 import js.JSConverters._
 
-import de.frosner.metaviz.d3.D3
+import de.frosner.metaviz.d3.{LinearScale, OrdinalScale, D3}
 
 import scala.scalajs.js.annotation.JSExport
 
 @JSExport
 case class ScatterPlot[X, Y](container: dom.Node,
                              title: String,
-                             config: js.Dictionary[String],
-                             data: js.Array[Point2D[X, Y]])
+                             config: ScatterPlotConfig,
+                             points: js.Array[Point2D[X, Y]])
                             (implicit numX: Numeric[X] = null,
                              numY: Numeric[Y] = null)
   extends Visualization {
@@ -26,7 +26,7 @@ case class ScatterPlot[X, Y](container: dom.Node,
   }
 
   def content: dom.Node = {
-    val xData = data.map(_.x)
+    val xData = points.map(_.x)
     val xScale = if (numX != null) {
       val xDoubleData = xData.map(x => numX.toDouble(x))
       val xMin = xDoubleData.min
@@ -38,7 +38,7 @@ case class ScatterPlot[X, Y](container: dom.Node,
       D3.scale.ordinal().domain(uniqueXData.toJSArray).rangeBands(js.Array(width, 0));
     }
 
-    val yData = data.map(_.y)
+    val yData = points.map(_.y)
     val yScale = if (numY != null) {
       val yDoubleData = yData.map(y => numY.toDouble(y))
       val yMin = yDoubleData.min
@@ -73,6 +73,33 @@ case class ScatterPlot[X, Y](container: dom.Node,
       .attr("transform", s"translate(0, 0)")
       .attr("class", "y axis")
       .call(yScale)
+
+    svgSelection.append("g")
+      .selectAll("scatter-dots")
+      .data(points)
+      .enter()
+      .append("svg:circle")
+      .attr("cx", (point: Point2D[X, Y]) => {
+        if (numX != null) {
+          val linear = xScale.asInstanceOf[LinearScale]
+          linear(point.x)
+        } else {
+          val ordinal = xScale.asInstanceOf[OrdinalScale]
+          val jitter = if (config.jitterEnabled) ordinal.rangeBand() * (Math.random - 0.5) * 0.4 else 0
+          ordinal(point.x) + (ordinal.rangeBand() / 2) + jitter
+        }
+      })
+      .attr("cy", (point: Point2D[X, Y]) => {
+        if (numY != null) {
+          val linear = yScale.asInstanceOf[LinearScale]
+          linear(point.y)
+        } else {
+          val ordinal = yScale.asInstanceOf[OrdinalScale]
+          val jitter = if (config.jitterEnabled) ordinal.rangeBand() * (Math.random - 0.5) * 0.4 else 0
+          ordinal(point.y) + (ordinal.rangeBand() / 2) + jitter
+        }
+      })
+      .attr("r", 3)
 
     svg
   }

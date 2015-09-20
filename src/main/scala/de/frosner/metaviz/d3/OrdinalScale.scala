@@ -7,6 +7,8 @@ trait OrdinalScale extends Scale {
 
   def domain[D](domain: js.Array[D]): OrdinalScale = js.native
 
+  def rangeBand(): Double = js.native
+
   def rangeBands(bands: js.Array[Double]): OrdinalScale = js.native
 
 }

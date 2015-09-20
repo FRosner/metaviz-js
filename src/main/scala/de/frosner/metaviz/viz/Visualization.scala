@@ -11,8 +11,6 @@ trait Visualization {
 
   val title: String
 
-  val config: js.Dictionary[String]
-
   @JSExport
   def draw(): Unit = {
     container.appendChild(content)
