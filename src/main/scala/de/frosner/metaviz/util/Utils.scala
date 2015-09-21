@@ -1,8 +1,7 @@
-package de.frosner.metaviz.viz
+package de.frosner.metaviz.util
 
-import scalajs.js
 import org.scalajs.dom
-import dom.document
+import org.scalajs.dom.document
 
 object Util {
 

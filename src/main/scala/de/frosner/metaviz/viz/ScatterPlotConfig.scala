@@ -1,8 +1,6 @@
 package de.frosner.metaviz.viz
 
-/**
- * Created by frosner on 20.09.15.
- */
-class ScatterPlotConfig {
+import scala.scalajs.js.annotation.JSExport
 
-}
+@JSExport
+case class ScatterPlotConfig(jitterEnabled: Boolean)

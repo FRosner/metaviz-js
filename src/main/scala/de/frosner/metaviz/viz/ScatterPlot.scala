@@ -1,5 +1,6 @@
 package de.frosner.metaviz.viz
 
+import de.frosner.metaviz.util.Margin
 import org.scalajs.dom
 import org.scalajs.dom.document
 import org.scalajs.jquery.jQuery
@@ -25,6 +26,16 @@ case class ScatterPlot[X, Y](container: dom.Node,
     (jQueryContainer.width(), jQueryContainer.height())
   }
 
+  private val margin = Margin(
+    top = 10,
+    left = 50,
+    bottom = 40,
+    right = 10
+  )
+
+  private val innerHeight = height - margin.vertical
+  private val innerWidth = width - margin.horizontal
+
   def content: dom.Node = {
     val xData = points.map(_.x)
     val xScale = if (numX != null) {
@@ -32,10 +43,10 @@ case class ScatterPlot[X, Y](container: dom.Node,
       val xMin = xDoubleData.min
       val xMax = xDoubleData.max
       val dX = xMax - xMin
-      D3.scale.linear().domain(js.Array(xMin - dX * 0.01, xMax + dX * 0.01)).range(js.Array(0, width));
+      D3.scale.linear().domain(js.Array(xMin - dX * 0.01, xMax + dX * 0.01)).range(js.Array(0, innerWidth));
     } else {
       val uniqueXData = xData.toSet
-      D3.scale.ordinal().domain(uniqueXData.toJSArray).rangeBands(js.Array(width, 0));
+      D3.scale.ordinal().domain(uniqueXData.toJSArray).rangeBands(js.Array(0, innerWidth));
     }
 
     val yData = points.map(_.y)
@@ -44,37 +55,42 @@ case class ScatterPlot[X, Y](container: dom.Node,
       val yMin = yDoubleData.min
       val yMax = yDoubleData.max
       val dY = yMax - yMin
-      D3.scale.linear().domain(js.Array(yMin - dY * 0.02, yMax + dY * 0.02)).range(js.Array(0, height));
+      D3.scale.linear().domain(js.Array(yMin - dY * 0.02, yMax + dY * 0.02)).range(js.Array(innerHeight, 0));
     } else {
       val uniqueYData = yData.toSet
-      D3.scale.ordinal().domain(uniqueYData.toJSArray).rangeBands(js.Array(height, 0));
+      D3.scale.ordinal().domain(uniqueYData.toJSArray).rangeBands(js.Array(innerHeight, 0));
     }
 
-    val svg = document.createElement("svg")
-    val svgSelection = D3.select(svg)
+    val mainDiv = document.createElement("div")
+    val mainGroup = D3.select(mainDiv)
+      .append("svg:svg")
       .attr("width", width)
       .attr("height", height)
       .attr("class", "c3")
+      .append("g")
+      .attr("width", innerWidth)
+      .attr("height", innerHeight)
+      .attr("transform", s"translate(${margin.left}, ${margin.top})")
 
     val xAxis = D3.svg.axis()
       .scale(xScale)
       .orient("bottom")
 
-    svgSelection.append("g")
-      .attr("transform", s"translate(0, $height)")
+    mainGroup.append("svg:g")
+      .attr("transform", s"translate(0, $innerHeight)")
       .attr("class", "x axis")
-      .call(xScale)
+      .call(xAxis)
 
     val yAxis = D3.svg.axis()
       .scale(yScale)
       .orient("left")
 
-    svgSelection.append("g")
+    mainGroup.append("svg:g")
       .attr("transform", s"translate(0, 0)")
       .attr("class", "y axis")
-      .call(yScale)
+      .call(yAxis)
 
-    svgSelection.append("g")
+    mainGroup.append("svg:g")
       .selectAll("scatter-dots")
       .data(points)
       .enter()
@@ -101,7 +117,7 @@ case class ScatterPlot[X, Y](container: dom.Node,
       })
       .attr("r", 3)
 
-    svg
+    mainDiv
   }
 
 }

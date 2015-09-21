@@ -20,3 +20,7 @@ jsDependencies += "org.webjars" % "d3js" % "3.5.6" / "d3.js"
 testFrameworks += new TestFramework("utest.runner.Framework")
 
 skip in packageJSDependencies := false
+
+persistLauncher in Compile := true
+
+persistLauncher in Test := false
